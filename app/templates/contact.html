@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="container contact-page">
+    <h2>Contact Us</h2>
+    <p>Have a question or feedback? Send us a message and we'll get back to you.</p>
+    <form method="post" action="{{ url_for('shop.contact') }}">
+        {{ csrf_token() }}
+        <label>{{ form.name.label.text }}</label>
+        {{ form.name(class='form-input', placeholder='Your name') }}
+        <label>{{ form.email.label.text }}</label>
+        {{ form.email(class='form-input', placeholder='Your email') }}
+        <label>{{ form.message.label.text }}</label>
+        {{ form.message(class='form-input', rows='5', placeholder='Your message') }}
+        {{ form.submit(class='btn btn-primary') }}
+    </form>
+</section>
+{% endblock %}

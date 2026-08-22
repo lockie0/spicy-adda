@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="container admin-orders">
+    <h2>Order Management</h2>
+    <div class="admin-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>User</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Placed</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                    <tr>
+                        <td>{{ order.id }}</td>
+                        <td>{{ order.user.username }}</td>
+                        <td>₹{{ order.total }}</td>
+                        <td>{{ order.status }}</td>
+                        <td>{{ order.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            <form method="post" action="{{ url_for('admin.update_order_status', order_id=order.id) }}">
+                                {{ csrf_token() }}
+                                <select name="status">
+                                    <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>Processing</option>
+                                    <option value="Completed" {% if order.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                    <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                                </select>
+                                <button type="submit" class="btn btn-secondary">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

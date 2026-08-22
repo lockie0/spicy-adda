@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="container checkout-page">
+    <h2>Checkout</h2>
+    <div class="checkout-grid">
+        <div>
+            <h3>Shipping Address</h3>
+            <form method="post">
+                {{ form.hidden_tag() }}
+                <label>{{ form.address.label.text }}</label>
+                {{ form.address(class='form-input', placeholder='Enter your shipping address') }}
+                <label>{{ form.payment_method.label.text }}</label>
+                {{ form.payment_method(class='form-input') }}
+                {{ form.submit(class='btn btn-primary') }}
+            </form>
+        </div>
+        <aside class="checkout-summary">
+            <h3>Order Summary</h3>
+            <ul>
+                {% for item in items %}
+                    <li>{{ item.product.name }} x {{ item.quantity }} <span>₹{{ item.product.price * item.quantity }}</span></li>
+                {% endfor %}
+            </ul>
+            <p class="total">Total: ₹{{ total }}</p>
+        </aside>
+    </div>
+</section>
+{% endblock %}

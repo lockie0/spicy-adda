@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="container admin-product-form">
+    <h2>Add Category</h2>
+    <form method="post">
+        {{ form.hidden_tag() }}
+        <label>{{ form.name.label.text }}</label>
+        {{ form.name(class='form-input', placeholder='Category name') }}
+        {{ form.submit(class='btn btn-primary') }}
+    </form>
+</section>
+{% endblock %}

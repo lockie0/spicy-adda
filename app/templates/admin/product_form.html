@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="container admin-product-form">
+    <h2>{{ 'Edit Product' if product else 'Add Product' }}</h2>
+    <form method="post" enctype="multipart/form-data">
+        {{ csrf_token() }}
+        <label>Name</label>
+        <input type="text" name="name" value="{{ product.name if product else '' }}" required />
+        <label>Description</label>
+        <textarea name="description" rows="4" required>{{ product.description if product else '' }}</textarea>
+        <label>Price</label>
+        <input type="number" name="price" min="1" value="{{ product.price if product else '' }}" required />
+        <label>Stock</label>
+        <input type="number" name="stock" min="0" value="{{ product.stock if product else '' }}" required />
+        <label>Category</label>
+        <select name="category" required>
+            {% for category in categories %}
+                <option value="{{ category.id }}" {% if product and category.id == product.category_id %}selected{% endif %}>{{ category.name }}</option>
+            {% endfor %}
+        </select>
+        <label>Image</label>
+        <input type="file" name="image" accept="image/*" />
+        <button type="submit" class="btn btn-primary">Save Product</button>
+    </form>
+</section>
+{% endblock %}

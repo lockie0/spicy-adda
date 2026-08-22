@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="container cart-page">
+    <h2>Your Shopping Cart</h2>
+    {% if items %}
+        <div class="cart-grid">
+            <div class="cart-items">
+                {% for item in items %}
+                    <article class="cart-item">
+                        <img src="{{ url_for('static', filename='images/' + item.product.image) }}" alt="{{ item.product.name }}" />
+                        <div>
+                            <h3>{{ item.product.name }}</h3>
+                            <p>₹{{ item.product.price }}</p>
+                            <form action="{{ url_for('cart.update_cart', item_id=item.id) }}" method="post">
+                                {{ csrf_token() }}
+                                <input type="number" name="quantity" min="1" value="{{ item.quantity }}" />
+                                <button class="btn btn-secondary" type="submit">Update</button>
+                            </form>
+                            <form action="{{ url_for('cart.remove_from_cart', item_id=item.id) }}" method="post" class="inline-form">
+                                {{ csrf_token() }}
+                                <button type="submit" class="btn btn-danger">Remove</button>
+                            </form>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+            <aside class="cart-summary">
+                <h3>Order Summary</h3>
+                <p>Total: ₹{{ total }}</p>
+                <a href="{{ url_for('orders.checkout') }}" class="btn btn-primary">Proceed to Checkout</a>
+            </aside>
+        </div>
+    {% else %}
+        <p>Your cart is empty. <a href="{{ url_for('shop.products') }}">Browse products</a>.</p>
+    {% endif %}
+</section>
+{% endblock %}

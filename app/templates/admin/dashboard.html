@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="container admin-dashboard">
+    <h2>Admin Dashboard</h2>
+    <div class="admin-cards">
+        <div class="admin-card">
+            <h3>Products</h3>
+            <p>{{ total_products }}</p>
+        </div>
+        <div class="admin-card">
+            <h3>Users</h3>
+            <p>{{ total_users }}</p>
+        </div>
+        <div class="admin-card">
+            <h3>Orders</h3>
+            <p>{{ total_orders }}</p>
+        </div>
+        <div class="admin-card">
+            <h3>Processing</h3>
+            <p>{{ pending_orders }}</p>
+        </div>
+    </div>
+    <div class="admin-actions">
+        <a href="{{ url_for('admin.products') }}" class="btn btn-secondary">Manage Products</a>
+        <a href="{{ url_for('admin.users') }}" class="btn btn-secondary">Manage Users</a>
+        <a href="{{ url_for('admin.admin_orders') }}" class="btn btn-secondary">Manage Orders</a>
+    </div>
+</section>
+{% endblock %}

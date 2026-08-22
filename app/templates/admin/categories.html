@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="container admin-products">
+    <div class="admin-actions">
+        <h2>Category Management</h2>
+        <a href="{{ url_for('admin.add_category') }}" class="btn btn-primary">Add New Category</a>
+    </div>
+    <div class="admin-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                    <tr>
+                        <td>{{ category.name }}</td>
+                        <td>
+                            <form action="{{ url_for('admin.delete_category', category_id=category.id) }}" method="post" class="inline-form">
+                                {{ csrf_token() }}
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

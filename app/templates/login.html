@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="container auth-page">
+    <div class="auth-card">
+        <h2>Login to Spicy Adda</h2>
+        <form action="{{ url_for('auth.login') }}" method="post">
+            {{ form.hidden_tag() }}
+            <label>{{ form.email.label.text }}</label>
+            {{ form.email(class='form-input', placeholder='Enter your email') }}
+            <label>{{ form.password.label.text }}</label>
+            {{ form.password(class='form-input', placeholder='Enter your password') }}
+            {{ form.submit(class='btn btn-primary') }}
+        </form>
+        <p>Don't have an account? <a href="{{ url_for('auth.register') }}">Register</a></p>
+    </div>
+</section>
+{% endblock %}

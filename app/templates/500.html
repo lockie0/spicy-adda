@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="container page-error">
+    <h2>500 - Internal Server Error</h2>
+    <p>Something went wrong on our side. Please try again later.</p>
+    <a href="{{ url_for('shop.home') }}" class="btn btn-primary">Back to Home</a>
+</section>
+{% endblock %}

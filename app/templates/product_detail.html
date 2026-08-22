@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="container product-detail">
+    <div class="product-preview">
+        <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" />
+    </div>
+    <div class="product-info">
+        <h1>{{ product.name }}</h1>
+        <p class="product-category">Category: {{ product.category.name }}</p>
+        <div class="product-rating">
+            <span><i class="fas fa-star"></i> {{ reviews|length }} reviews</span>
+            <span>Stock: {{ product.stock }}</span>
+        </div>
+        <p class="product-price">₹{{ product.price }}</p>
+        <p>{{ product.description }}</p>
+
+        <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post">
+            {{ csrf_token() }}
+            <label>Quantity</label>
+            <input type="number" name="quantity" min="1" value="1" />
+            <button type="submit" class="btn btn-primary">Add to Cart</button>
+        </form>
+    </div>
+</section>
+
+<section class="container reviews-section">
+    <h2>Customer Reviews</h2>
+    {% if reviews %}
+        {% for review in reviews %}
+            <article class="review-card">
+                <div class="review-rating">{{ review.rating }}/5</div>
+                <p>{{ review.comment }}</p>
+                <span>{{ review.user.username }} • {{ review.created_at.strftime('%Y-%m-%d') }}</span>
+            </article>
+        {% endfor %}
+    {% else %}
+        <p>No reviews yet. Be the first to leave feedback.</p>
+    {% endif %}
+</section>
+{% endblock %}

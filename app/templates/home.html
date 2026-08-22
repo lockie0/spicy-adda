@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="hero container">
+    <div class="hero-copy">
+        <span class="eyebrow">Welcome to Spicy Adda</span>
+        <h1>Fresh Street Snacks Delivered Fast</h1>
+        <p>Discover crispy Bajjis, tasty Puri, flavor-packed combos, and refreshing beverages in one place.</p>
+        <a href="{{ url_for('shop.products') }}" class="btn btn-primary">Shop Now</a>
+    </div>
+    <div class="hero-image"></div>
+</section>
+
+<section class="featured container">
+    <h2>Featured Products</h2>
+    <div class="grid gallery-grid">
+        {% for product in featured %}
+            <article class="card">
+                <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" />
+                <div class="card-body">
+                    <h3>{{ product.name }}</h3>
+                    <p>{{ product.description[:90] }}...</p>
+                    <div class="card-meta">₹{{ product.price }}</div>
+                    <a href="{{ url_for('shop.product_detail', product_id=product.id) }}" class="btn btn-secondary">View</a>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="categories container">
+    <h2>Shop by Category</h2>
+    <div class="grid category-grid">
+        {% for category in categories %}
+            <a href="{{ url_for('shop.products') }}?category={{ category.id }}" class="category-card">{{ category.name }}</a>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="newsletter container">
+    <div class="newsletter-content">
+        <h2>Join the Spice Club</h2>
+        <p>Get updates on new combos, exclusive deals, and tasty offers.</p>
+        <form method="post" action="{{ url_for('shop.subscribe') }}">
+            {{ csrf_token() }}
+            <input type="email" name="email" placeholder="Enter your email" aria-label="Email" required />
+            <button type="submit" class="btn btn-primary">Subscribe</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

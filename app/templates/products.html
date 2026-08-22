@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="container page-header">
+    <div>
+        <h2>Shop All Products</h2>
+        <p>Find your favorite snack, beverage, or combo with fast checkout.</p>
+    </div>
+    <form class="filter-form" method="get">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search products..." />
+        <select name="category">
+            <option value="">All Categories</option>
+            {% for category in categories %}
+                <option value="{{ category.id }}" {% if category.id == selected_category %}selected{% endif %}>{{ category.name }}</option>
+            {% endfor %}
+        </select>
+        <select name="sort">
+            <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest</option>
+            <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price Low to High</option>
+            <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price High to Low</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+</section>
+
+<section class="container grid product-grid">
+    {% if products %}
+        {% for product in products %}
+            <article class="card product-card">
+                <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" />
+                <div class="card-body">
+                    <h3>{{ product.name }}</h3>
+                    <p>{{ product.description[:90] }}...</p>
+                    <div class="product-meta">
+                        <span>₹{{ product.price }}</span>
+                        <span>{{ product.stock }} left</span>
+                    </div>
+                    <a href="{{ url_for('shop.product_detail', product_id=product.id) }}" class="btn btn-secondary">View Details</a>
+                </div>
+            </article>
+        {% endfor %}
+    {% else %}
+        <p>No products found for this selection.</p>
+    {% endif %}
+</section>
+{% endblock %}
