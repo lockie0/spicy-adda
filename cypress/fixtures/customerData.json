@@ -1,0 +1,8 @@
+{
+  "validCustomer": {
+    "name": "Test Customer",
+    "email": "test@example.com",
+    "address": "Hyderabad, Telangana",
+    "phone": "9876543210"
+  }
+}

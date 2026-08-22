@@ -1,0 +1,14 @@
+{
+  "name": "spicy-adda-cypress-tests",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Cypress automation for the Spicy Adda storefront",
+  "scripts": {
+    "test": "cypress run",
+    "test:open": "cypress open",
+    "test:chrome": "cypress run --browser chrome"
+  },
+  "devDependencies": {
+    "cypress": "^13.17.0"
+  }
+}
