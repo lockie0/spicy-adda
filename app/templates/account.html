@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="container auth-page">
+    <div class="auth-banner">
+        <p class="auth-brand"><span>Spicy</span> Adda</p>
+        <p class="auth-tagline">GOOD FOOD | GOOD MOOD</p>
+        <p class="auth-slogan">EAT FRESH, STAY HAPPY!</p>
+        <p class="auth-welcome">Fresh street snacks, made for every craving.</p>
+    </div>
+
+    <div class="auth-card">
+        {% if mode == 'login' %}
+            <p class="auth-kicker">WELCOME BACK</p>
+            <h2>Sign In</h2>
+            <p class="auth-subtitle">Sign in to order your favorite Spicy Adda snacks.</p>
+            <form action="{{ url_for('auth.account', mode='login') }}" method="post">
+                {{ login_form.hidden_tag() }}
+                <label>{{ login_form.email.label.text }}</label>
+                {{ login_form.email(class='form-input', placeholder='Enter your office email') }}
+                <label>{{ login_form.password.label.text }}</label>
+                {{ login_form.password(class='form-input', placeholder='Enter your password') }}
+                {{ login_form.submit(class='btn btn-primary') }}
+            </form>
+            <p>Don't have an account? <a href="{{ url_for('auth.account', mode='register') }}">Create Account</a></p>
+        {% else %}
+            <p class="auth-kicker">JOIN THE SPICE CLUB</p>
+            <h2>Create Your <span>Account</span></h2>
+            <p class="auth-subtitle">Join Spicy Adda and enjoy fresh, delicious snacks.</p>
+            <form action="{{ url_for('auth.account', mode='register') }}" method="post">
+                {{ registration_form.hidden_tag() }}
+                <label>{{ registration_form.username.label.text }}</label>
+                {{ registration_form.username(class='form-input', placeholder='Choose a username') }}
+                <label>{{ registration_form.designation.label.text }}</label>
+                {{ registration_form.designation(class='form-input') }}
+                <label>{{ registration_form.email.label.text }}</label>
+                {{ registration_form.email(class='form-input', placeholder='Enter your office email') }}
+                <label>{{ registration_form.password.label.text }}</label>
+                {{ registration_form.password(class='form-input', placeholder='Create a password') }}
+                <label>{{ registration_form.confirm.label.text }}</label>
+                {{ registration_form.confirm(class='form-input', placeholder='Confirm your password') }}
+                {{ registration_form.submit(class='btn btn-primary') }}
+            </form>
+            <p>Already have an account? <a href="{{ url_for('auth.account', mode='login') }}">Sign In</a></p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -2,7 +2,7 @@
 {% block content %}
 <section class="container product-detail">
     <div class="product-preview">
-        <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" />
+        <img src="{{ product.image if product.image.startswith('http') else url_for('static', filename='images/food-fallback.svg') }}" alt="{{ product.name }}" onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/food-fallback.svg') }}';" />
     </div>
     <div class="product-info">
         <h1>{{ product.name }}</h1>
@@ -15,7 +15,7 @@
         <p>{{ product.description }}</p>
 
         <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post">
-            {{ csrf_token() }}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <label>Quantity</label>
             <input type="number" name="quantity" min="1" value="1" />
             <button type="submit" class="btn btn-primary">Add to Cart</button>

@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Spicy Adda</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet" />
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
-<body>
+<body class="app-shell {% if request.endpoint in ['auth.account', 'auth.register', 'auth.login'] %}auth-shell{% elif request.endpoint == 'shop.products' %}shop-shell{% endif %}">
     <header class="site-header">
         <div class="container header-grid">
             <a href="{{ url_for('shop.home') }}" class="brand">
-                <span>Spicy</span> Adda
+                <img src="{{ url_for('static', filename='images/spicy-adda-header.svg') }}" alt="Spicy Adda" />
             </a>
             <nav class="main-nav">
                 <a href="{{ url_for('shop.home') }}">Home</a>
@@ -22,12 +25,14 @@
             </nav>
             <div class="nav-actions">
                 {% if current_user.is_authenticated %}
+                    {% if not current_user.is_admin %}
+                        <a href="{{ url_for('employee.dashboard') }}">Dashboard</a>
+                    {% endif %}
                     <a href="{{ url_for('cart.cart') }}"><i class="fas fa-shopping-cart"></i></a>
                     <a href="{{ url_for('orders.history') }}"><i class="fas fa-history"></i></a>
                     <a href="{{ url_for('auth.logout') }}">Logout</a>
                 {% else %}
-                    <a href="{{ url_for('auth.login') }}">Login</a>
-                    <a href="{{ url_for('auth.register') }}">Register</a>
+                    <a href="{{ url_for('auth.register') }}">Login / Register</a>
                 {% endif %}
             </div>
         </div>
@@ -63,7 +68,7 @@
                 <h4>Support</h4>
                 <a href="{{ url_for('shop.contact') }}">Contact</a>
                 <a href="{{ url_for('shop.faq') }}">FAQ</a>
-                <a href="{{ url_for('auth.login') }}">Account</a>
+                <a href="{{ url_for('auth.register') }}">Account</a>
             </div>
         </div>
         <div class="footer-bottom">

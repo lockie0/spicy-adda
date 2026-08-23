@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="container employee-dashboard">
+    <div class="page-header">
+        <div>
+            <p class="eyebrow">IT Employee Dashboard</p>
+            <h1>Welcome, {{ current_user.username }}</h1>
+            <p>{{ current_user.designation or 'Employee' }} at {{ current_user.company or 'Your company' }} · {{ current_user.email }}</p>
+        </div>
+        <a href="{{ url_for('shop.products') }}" class="btn btn-primary">Browse Menu</a>
+    </div>
+
+    <nav class="dashboard-tabs" aria-label="Employee dashboard">
+        <a class="{% if tab == 'home' %}active{% endif %}" href="{{ url_for('employee.dashboard', tab='home') }}">Home</a>
+        <a href="{{ url_for('shop.products', category='menu') }}">Menu</a>
+        <a href="{{ url_for('shop.products', category='combos') }}">Combos</a>
+        <a href="{{ url_for('shop.products', category='offers') }}">Offers</a>
+        <a class="{% if tab == 'orders' %}active{% endif %}" href="{{ url_for('employee.dashboard', tab='orders') }}">My Orders</a>
+        <a class="{% if tab == 'company' %}active{% endif %}" href="{{ url_for('employee.dashboard', tab='company') }}">Company Orders</a>
+        <a href="{{ url_for('auth.logout') }}">Logout</a>
+    </nav>
+
+    {% if tab == 'orders' %}
+        <section class="dashboard-section">
+            <h2>My Orders</h2>
+            {% if my_orders %}
+                {% for order in my_orders %}
+                    <article class="order-card">
+                        <div class="order-heading"><h3>Order #{{ order.id }}</h3><strong>{{ order.status }}</strong></div>
+                        <p>{{ order.user.username }} · {{ order.user.designation or 'Employee' }} · {{ order.user.company or 'Company' }} · {{ order.user.email }}</p>
+                        <p>{{ order.created_at.strftime('%d/%m/%Y') }} at {{ order.created_at.strftime('%H:%M') }} · ₹{{ order.total }}</p>
+                        <div class="order-table">
+                            {% for detail in order.details %}
+                                <div><span>{{ detail.product.name }}</span><span>{{ detail.quantity }} × ₹{{ detail.price }}</span></div>
+                            {% endfor %}
+                        </div>
+                        <a href="{{ url_for('orders.detail', order_id=order.id) }}" class="btn btn-secondary">View Details</a>
+                    </article>
+                {% endfor %}
+            {% else %}
+                <p>No orders yet. <a href="{{ url_for('shop.products') }}">Shop now</a>.</p>
+            {% endif %}
+        </section>
+    {% elif tab == 'company' %}
+        <section class="dashboard-section">
+            <h2>Company Orders</h2>
+            <div class="company-tabs">
+                {% for company in companies %}
+                    <a class="{% if company == selected_company %}active{% endif %}" href="{{ url_for('employee.dashboard', tab='company', company=company) }}">{{ company }}</a>
+                {% endfor %}
+            </div>
+            <div class="admin-cards">
+                <div class="admin-card"><h3>Today's Total Orders</h3><p>{{ today_order_count }} Orders</p></div>
+                <div class="admin-card"><h3>Today's Total Bill Amount</h3><p>₹{{ '{:,}'.format(today_revenue) }}</p></div>
+            </div>
+            {% if company_orders %}
+                <div class="admin-table"><table>
+                    <thead><tr><th>Employee</th><th>Designation</th><th>Office Email</th><th>Item</th><th>Price</th><th>Date</th><th>Time</th></tr></thead>
+                    <tbody>
+                    {% for order in company_orders %}
+                        {% for detail in order.details %}
+                            <tr><td>{{ order.user.username }}</td><td>{{ order.user.designation or 'Employee' }}</td><td>{{ order.user.email }}</td><td>{{ detail.product.name }} × {{ detail.quantity }}</td><td>₹{{ detail.price * detail.quantity }}</td><td>{{ order.created_at.strftime('%d/%m/%Y') }}</td><td>{{ order.created_at.strftime('%H:%M') }}</td></tr>
+                        {% endfor %}
+                    {% endfor %}
+                    </tbody>
+                </table></div>
+            {% else %}
+                <p>No orders found for {{ selected_company }}.</p>
+            {% endif %}
+        </section>
+    {% else %}
+        <section class="dashboard-section dashboard-welcome">
+            <h2>Order something delicious</h2>
+            <p>Browse the existing Spicy Adda menu, add items to your cart, and complete checkout as usual.</p>
+            <a href="{{ url_for('shop.products') }}" class="btn btn-primary">View Menu</a>
+        </section>
+    {% endif %}
+</section>
+{% endblock %}

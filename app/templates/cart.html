@@ -7,17 +7,17 @@
             <div class="cart-items">
                 {% for item in items %}
                     <article class="cart-item">
-                        <img src="{{ url_for('static', filename='images/' + item.product.image) }}" alt="{{ item.product.name }}" />
+                        <img src="{{ item.product.image if item.product.image.startswith('http') else url_for('static', filename='images/food-fallback.svg') }}" alt="{{ item.product.name }}" onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/food-fallback.svg') }}';" />
                         <div>
                             <h3>{{ item.product.name }}</h3>
-                            <p>₹{{ item.product.price }}</p>
+                            <p>₹{{ item.product.price }} each · Subtotal: ₹{{ item.product.price * item.quantity }}</p>
                             <form action="{{ url_for('cart.update_cart', item_id=item.id) }}" method="post">
-                                {{ csrf_token() }}
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                 <input type="number" name="quantity" min="1" value="{{ item.quantity }}" />
                                 <button class="btn btn-secondary" type="submit">Update</button>
                             </form>
                             <form action="{{ url_for('cart.remove_from_cart', item_id=item.id) }}" method="post" class="inline-form">
-                                {{ csrf_token() }}
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                 <button type="submit" class="btn btn-danger">Remove</button>
                             </form>
                         </div>

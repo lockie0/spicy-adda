@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
+{% set fallback_image = url_for('static', filename='images/food-fallback.svg') %}
+{% set legacy_images = {
+    'Family Combo': 'https://upload.wikimedia.org/wikipedia/commons/d/d6/Delhi_Chaat_in_Mumbai.jpg'
+} %}
 <section class="container page-header">
     <div>
         <h2>Shop All Products</h2>
@@ -8,9 +12,8 @@
     <form class="filter-form" method="get">
         <input type="text" name="q" value="{{ query }}" placeholder="Search products..." />
         <select name="category">
-            <option value="">All Categories</option>
-            {% for category in categories %}
-                <option value="{{ category.id }}" {% if category.id == selected_category %}selected{% endif %}>{{ category.name }}</option>
+            {% for value, label in category_options %}
+                <option value="{{ value }}" {% if value == selected_category %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
         <select name="sort">
@@ -23,10 +26,33 @@
 </section>
 
 <section class="container grid product-grid">
-    {% if products %}
+    {% if selected_category == 'offers' %}
+        {% for name, description in offers %}
+            <article class="card product-card offer-product-card">
+                <div class="product-image-frame"><img src="{{ fallback_image }}" alt="{{ name }}" /></div>
+                <div class="card-body">
+                    <p class="product-category">SPICY ADDA OFFER</p>
+                    <h3>{{ name }}</h3>
+                    <p>{{ description }}</p>
+                    <div class="product-meta"><span>Special Deal</span></div>
+                </div>
+            </article>
+        {% endfor %}
+    {% elif products %}
         {% for product in products %}
             <article class="card product-card">
-                <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" />
+                <div class="product-image-frame">
+                    {% if product.category.name == 'Combos' and combo_items.get(product.name) %}
+                        <div class="combo-image-grid combo-image-count-{{ combo_items[product.name]|length }}">
+                            {% for item_name in combo_items[product.name] %}
+                                {% set item_image = product_images.get(item_name, fallback_image) %}
+                                <img src="{{ item_image if item_image.startswith('http') else fallback_image }}" alt="{{ product.name }} - {{ item_name }}" onerror="this.onerror=null;this.src='{{ fallback_image }}';" />
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <img src="{{ legacy_images.get(product.name, product.image if product.image.startswith('http') else fallback_image) }}" alt="{{ product.name }}" onerror="this.onerror=null;this.src='{{ fallback_image }}';" />
+                    {% endif %}
+                </div>
                 <div class="card-body">
                     <h3>{{ product.name }}</h3>
                     <p>{{ product.description[:90] }}...</p>
@@ -34,7 +60,14 @@
                         <span>₹{{ product.price }}</span>
                         <span>{{ product.stock }} left</span>
                     </div>
-                    <a href="{{ url_for('shop.product_detail', product_id=product.id) }}" class="btn btn-secondary">View Details</a>
+                    <div class="product-actions">
+                        <a href="{{ url_for('shop.product_detail', product_id=product.id) }}" class="btn btn-secondary">View Details</a>
+                        <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <input type="hidden" name="quantity" value="1" />
+                            <button type="submit" class="btn btn-primary">Add to Cart</button>
+                        </form>
+                    </div>
                 </div>
             </article>
         {% endfor %}

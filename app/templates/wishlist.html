@@ -6,7 +6,7 @@
         <div class="product-grid">
             {% for item in items %}
                 <article class="card product-card">
-                    <img src="{{ url_for('static', filename='images/' + item.product.image) }}" alt="{{ item.product.name }}" />
+                    <img src="{{ item.product.image if item.product.image.startswith('http') else url_for('static', filename='images/food-fallback.svg') }}" alt="{{ item.product.name }}" onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/food-fallback.svg') }}';" />
                     <div class="card-body">
                         <h3>{{ item.product.name }}</h3>
                         <p>{{ item.product.description[:90] }}...</p>

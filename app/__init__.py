@@ -1,10 +1,9 @@
 import os
 from flask import Flask
+from sqlalchemy import inspect, text
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
-
-basedir = os.path.abspath(os.path.dirname(__file__))
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -40,6 +39,7 @@ def create_app():
     from app.routes.admin import admin_bp
     from app.routes.errors import errors_bp
     from app.routes.api import api_bp
+    from app.routes.employee import employee_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(shop_bp)
@@ -48,8 +48,17 @@ def create_app():
     app.register_blueprint(admin_bp)
     app.register_blueprint(errors_bp)
     app.register_blueprint(api_bp)
+    app.register_blueprint(employee_bp)
 
     with app.app_context():
         db.create_all()
+        user_columns = {column['name'] for column in inspect(db.engine).get_columns('user')}
+        with db.engine.begin() as connection:
+            if 'designation' not in user_columns:
+                connection.execute(text('ALTER TABLE user ADD COLUMN designation VARCHAR(80)'))
+            if 'company' not in user_columns:
+                connection.execute(text('ALTER TABLE user ADD COLUMN company VARCHAR(120)'))
+        from app.utils import sync_product_catalog
+        sync_product_catalog()
 
     return app

@@ -8,7 +8,9 @@ from app import db, login_manager
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
+    designation = db.Column(db.String(80), nullable=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    company = db.Column(db.String(120), nullable=True)
     password_hash = db.Column(db.String(256), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -40,8 +42,9 @@ class Product(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     reviews = db.relationship('Review', backref='product', lazy=True)
-    wishlist_items = db.relationship('WishlistItem', backref='product', lazy=True)
-    order_details = db.relationship('OrderDetail', backref='product', lazy=True)
+    cart_items = db.relationship('CartItem', back_populates='product', lazy=True)
+    wishlist_items = db.relationship('WishlistItem', back_populates='product', lazy=True)
+    order_details = db.relationship('OrderDetail', back_populates='product', lazy=True)
 
 
 class CartItem(db.Model):
@@ -51,7 +54,7 @@ class CartItem(db.Model):
     quantity = db.Column(db.Integer, nullable=False, default=1)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    product = db.relationship('Product')
+    product = db.relationship('Product', back_populates='cart_items')
 
 
 class WishlistItem(db.Model):
@@ -60,7 +63,7 @@ class WishlistItem(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    product = db.relationship('Product')
+    product = db.relationship('Product', back_populates='wishlist_items')
 
 
 class Order(db.Model):
@@ -81,7 +84,7 @@ class OrderDetail(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Integer, nullable=False)
 
-    product = db.relationship('Product')
+    product = db.relationship('Product', back_populates='order_details')
 
 
 class Review(db.Model):

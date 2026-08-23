@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 
 from app import db
 from app.models import CartItem, Product
+from app.services.cart import add_product_to_cart, calculate_cart_total, get_cart_items, set_cart_quantity
 
 cart_bp = Blueprint('cart', __name__)
 
@@ -10,8 +11,8 @@ cart_bp = Blueprint('cart', __name__)
 @cart_bp.route('/cart')
 @login_required
 def cart():
-    items = CartItem.query.filter_by(user_id=current_user.id).all()
-    total = sum(item.product.price * item.quantity for item in items)
+    items = get_cart_items(current_user.id)
+    total = calculate_cart_total(items)
     return render_template('cart.html', items=items, total=total)
 
 
@@ -19,14 +20,11 @@ def cart():
 @login_required
 def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
-    quantity = request.form.get('quantity', type=int, default=1)
-    item = CartItem.query.filter_by(user_id=current_user.id, product_id=product.id).first()
-
-    if item:
-        item.quantity += quantity
-    else:
-        item = CartItem(user_id=current_user.id, product_id=product.id, quantity=quantity)
-        db.session.add(item)
+    try:
+        add_product_to_cart(current_user.id, product, request.form.get('quantity'))
+    except ValueError as error:
+        flash(str(error), 'danger')
+        return redirect(url_for('shop.product_detail', product_id=product.id))
 
     db.session.commit()
     flash('Added to cart successfully.', 'success')
@@ -41,13 +39,13 @@ def update_cart(item_id):
         flash('Invalid cart update.', 'danger')
         return redirect(url_for('cart.cart'))
 
-    quantity = request.form.get('quantity', type=int, default=1)
-    if quantity < 1:
-        db.session.delete(item)
+    try:
+        set_cart_quantity(item, request.form.get('quantity'))
+    except ValueError as error:
+        flash(str(error), 'danger')
     else:
-        item.quantity = quantity
+        flash('Cart updated successfully.', 'success')
     db.session.commit()
-    flash('Cart updated successfully.', 'success')
     return redirect(url_for('cart.cart'))
 
 

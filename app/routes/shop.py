@@ -3,14 +3,14 @@ from flask_login import current_user, login_required
 from app import db
 from app.forms import SearchForm, ReviewForm, ContactForm
 from app.models import Product, Category, Review, WishlistItem, ContactMessage, Subscriber
-from app.utils import add_recently_viewed, get_recently_viewed
+from app.utils import COMBO_ITEMS, SHOP_CATEGORIES, OFFER_CATALOG, add_recently_viewed, get_recently_viewed
 
 shop_bp = Blueprint('shop', __name__)
 
 
-def build_search_form(category_id=None, sort_by='newest'):
+def build_search_form(sort_by='newest'):
     categories = Category.query.order_by(Category.name).all()
-    form = SearchForm(request.args, meta={'csrf': False})
+    form = SearchForm(meta={'csrf': False})
     form.category.choices = [(0, 'All Categories')] + [(category.id, category.name) for category in categories]
     form.sort.data = sort_by
     return form, categories
@@ -33,15 +33,29 @@ def home():
 @shop_bp.route('/products')
 def products():
     query = request.args.get('q', '').strip()
-    category_id = request.args.get('category', type=int) or 0
+    category_filter = request.args.get('category', 'all').strip().lower() or 'all'
+    if category_filter.isdigit():
+        selected_category = Category.query.get(int(category_filter))
+        category_filter = selected_category.name.lower().replace(' ', '-') if selected_category else 'all'
     sort_by = request.args.get('sort', 'newest')
     page = request.args.get('page', 1, type=int)
 
     products_query = Product.query
     if query:
-        products_query = products_query.filter(Product.name.ilike(f'%{query}%') | Product.description.ilike(f'%{query}%'))
-    if category_id:
-        products_query = products_query.filter_by(category_id=category_id)
+        products_query = products_query.join(Category).filter(
+            Product.name.ilike(f'%{query}%') |
+            Product.description.ilike(f'%{query}%') |
+            Category.name.ilike(f'%{query}%')
+        )
+    if category_filter == 'menu':
+        products_query = products_query.join(Category).filter(Category.name != 'Combos')
+    elif category_filter == 'combos':
+        products_query = products_query.join(Category).filter(Category.name == 'Combos')
+    elif category_filter == 'offers':
+        products_query = products_query.filter(Product.id == -1)
+    elif category_filter in {'snacks', 'chaat', 'beverages', 'street-food', 'sweets'}:
+        category_name = category_filter.replace('-', ' ').title()
+        products_query = products_query.join(Category).filter(Category.name == category_name)
 
     if sort_by == 'price_asc':
         products_query = products_query.order_by(Product.price.asc())
@@ -51,8 +65,9 @@ def products():
         products_query = products_query.order_by(Product.created_at.desc())
 
     products = products_query.paginate(page=page, per_page=12, error_out=False)
-    form, categories = build_search_form(category_id=category_id, sort_by=sort_by)
-    return render_template('products.html', products=products, categories=categories, query=query, selected_category=category_id, sort_by=sort_by, form=form)
+    form, categories = build_search_form(sort_by=sort_by)
+    product_images = {product.name: product.image for product in Product.query.all()}
+    return render_template('products.html', products=products, categories=categories, category_options=SHOP_CATEGORIES, offers=OFFER_CATALOG, combo_items=COMBO_ITEMS, product_images=product_images, query=query, selected_category=category_filter, sort_by=sort_by, form=form)
 
 
 @shop_bp.route('/product/<int:product_id>', methods=['GET', 'POST'])

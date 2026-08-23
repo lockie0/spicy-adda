@@ -3,7 +3,9 @@ from flask_login import login_required, current_user
 
 from app import db
 from app.forms import CheckoutForm
-from app.models import CartItem, Order, OrderDetail, Product
+from app.models import Order
+from app.services.cart import calculate_cart_total, get_cart_items
+from app.services.orders import create_order, save_order
 
 orders_bp = Blueprint('orders', __name__, url_prefix='/orders')
 
@@ -11,36 +13,22 @@ orders_bp = Blueprint('orders', __name__, url_prefix='/orders')
 @orders_bp.route('/checkout', methods=['GET', 'POST'])
 @login_required
 def checkout():
-    items = CartItem.query.filter_by(user_id=current_user.id).all()
+    items = get_cart_items(current_user.id)
     if not items:
         flash('Your cart is empty.', 'warning')
         return redirect(url_for('shop.products'))
 
-    total = sum(item.product.price * item.quantity for item in items)
+    total = calculate_cart_total(items)
     form = CheckoutForm()
 
     if form.validate_on_submit():
-        order = Order(
+        order = create_order(
             user_id=current_user.id,
             total=total,
             shipping_address=form.address.data.strip(),
-            status='Processing',
+            status='Completed' if form.payment_method.data != 'stripe' else 'Processing',
         )
-        db.session.add(order)
-        db.session.flush()
-
-        for item in items:
-            detail = OrderDetail(
-                order_id=order.id,
-                product_id=item.product.id,
-                quantity=item.quantity,
-                price=item.product.price,
-            )
-            db.session.add(detail)
-            item.product.stock -= item.quantity
-            db.session.delete(item)
-
-        db.session.commit()
+        save_order(order, items)
         session['last_order'] = order.id
 
         if form.payment_method.data == 'stripe':
@@ -62,6 +50,9 @@ def payment_placeholder(order_id):
 @login_required
 def success(order_id):
     order = Order.query.filter_by(id=order_id, user_id=current_user.id).first_or_404()
+    if order.status == 'Processing':
+        order.status = 'Completed'
+        db.session.commit()
     return render_template('success.html', order=order)
 
 

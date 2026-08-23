@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify, request, abort
 from flask_login import current_user, login_required
-from app.models import Product, Category, CartItem, Order, OrderDetail
+from app.models import Product, Category, CartItem, Order
 from app import db
+from app.services.cart import add_product_to_cart, calculate_item_total, get_cart_items, set_cart_quantity
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -56,14 +57,14 @@ def product_detail(product_id):
 @api_bp.route('/cart')
 @login_required
 def cart_items():
-    items = CartItem.query.filter_by(user_id=current_user.id).all()
+    items = get_cart_items(current_user.id)
     data = []
     for item in items:
         data.append({
             'id': item.id,
             'product': product_to_dict(item.product),
             'quantity': item.quantity,
-            'subtotal': item.product.price * item.quantity,
+            'subtotal': calculate_item_total(item),
         })
     return jsonify(data)
 
@@ -73,18 +74,15 @@ def cart_items():
 def add_cart_item():
     body = request.get_json() or {}
     product_id = body.get('product_id')
-    quantity = int(body.get('quantity', 1))
-
-    if not product_id or quantity < 1:
+    quantity = body.get('quantity', 1)
+    if not product_id:
         abort(400)
 
     product = Product.query.get_or_404(product_id)
-    item = CartItem.query.filter_by(user_id=current_user.id, product_id=product.id).first()
-    if item:
-        item.quantity += quantity
-    else:
-        item = CartItem(user_id=current_user.id, product_id=product.id, quantity=quantity)
-        db.session.add(item)
+    try:
+        item = add_product_to_cart(current_user.id, product, quantity)
+    except ValueError:
+        abort(400)
     db.session.commit()
     return jsonify({'success': True, 'cart_item_id': item.id})
 
@@ -99,11 +97,10 @@ def update_cart_item(item_id):
         return jsonify({'success': True})
 
     body = request.get_json() or {}
-    quantity = int(body.get('quantity', 1))
-    if quantity < 1:
-        db.session.delete(item)
-    else:
-        item.quantity = quantity
+    try:
+        set_cart_quantity(item, body.get('quantity'))
+    except ValueError:
+        abort(400)
     db.session.commit()
     return jsonify({'success': True, 'quantity': item.quantity})
 

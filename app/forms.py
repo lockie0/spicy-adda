@@ -6,14 +6,24 @@ from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=3, max=80)])
-    email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
+    designation = SelectField('Designation', choices=[
+        ('Developer', 'Developer'),
+        ('Tester', 'Tester'),
+        ('QA Engineer', 'QA Engineer'),
+        ('Software Engineer', 'Software Engineer'),
+        ('DevOps Engineer', 'DevOps Engineer'),
+        ('HR', 'HR'),
+        ('Manager', 'Manager'),
+        ('Other', 'Other'),
+    ], validators=[DataRequired()])
+    email = StringField('Office Email', validators=[DataRequired(), Email(), Length(max=120)])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     confirm = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Create Account')
 
 
 class LoginForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
+    email = StringField('Office Email', validators=[DataRequired(), Email(), Length(max=120)])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Sign In')
 
@@ -48,7 +58,13 @@ class CategoryForm(FlaskForm):
 
 class CheckoutForm(FlaskForm):
     address = TextAreaField('Shipping Address', validators=[DataRequired(), Length(min=10, max=255)])
-    payment_method = SelectField('Payment Method', choices=[('razorpay', 'Razorpay Placeholder'), ('stripe', 'Stripe Placeholder')], validators=[DataRequired()])
+    payment_method = SelectField('Payment Method', choices=[
+        ('UPI', 'UPI'),
+        ('PhonePe', 'PhonePe'),
+        ('Net Banking', 'Net Banking'),
+        ('razorpay', 'Razorpay Placeholder'),
+        ('stripe', 'Stripe Placeholder'),
+    ], validators=[DataRequired()])
     submit = SubmitField('Place Order')
 
 

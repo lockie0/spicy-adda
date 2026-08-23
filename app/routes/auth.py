@@ -1,56 +1,54 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, login_required, logout_user, current_user
-from werkzeug.security import generate_password_hash
-
-from app import db
 from app.forms import LoginForm, RegistrationForm
-from app.models import User
+from app.services.auth import authenticate_user, register_user
 
 auth_bp = Blueprint('auth', __name__)
 
 
+@auth_bp.route('/account', methods=['GET', 'POST'])
+def account():
+    if current_user.is_authenticated:
+        return redirect(url_for('employee.dashboard'))
+
+    mode = request.args.get('mode', 'register')
+    registration_form = RegistrationForm()
+    login_form = LoginForm()
+
+    if mode == 'login':
+        if login_form.validate_on_submit():
+            user = authenticate_user(login_form.email.data, login_form.password.data)
+            if user:
+                login_user(user)
+                return redirect(request.args.get('next') or url_for('employee.dashboard'))
+            flash('Invalid email or password.', 'danger')
+        return render_template('account.html', mode='login', registration_form=registration_form, login_form=login_form)
+
+    if registration_form.validate_on_submit():
+        try:
+            register_user(
+                registration_form.username.data,
+                registration_form.designation.data,
+                registration_form.email.data,
+                registration_form.password.data,
+            )
+        except ValueError as error:
+            flash(str(error), 'danger')
+        else:
+            flash('Registration successful. Please login.', 'success')
+            return redirect(url_for('auth.account', mode='login'))
+
+    return render_template('account.html', mode='register', registration_form=registration_form, login_form=login_form)
+
+
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('shop.home'))
-
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        if User.query.filter((User.username == form.username.data) | (User.email == form.email.data)).first():
-            flash('Username or email already exists.', 'danger')
-            return redirect(url_for('auth.register'))
-
-        user = User(
-            username=form.username.data.strip(),
-            email=form.email.data.strip().lower(),
-            password_hash=generate_password_hash(form.password.data),
-        )
-        db.session.add(user)
-        db.session.commit()
-
-        flash('Registration successful. Please login.', 'success')
-        return redirect(url_for('auth.login'))
-
-    return render_template('register.html', form=form)
+    return redirect(url_for('auth.account', mode='register'))
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('shop.home'))
-
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data.strip().lower()).first()
-        if user and user.check_password(form.password.data):
-            login_user(user)
-            next_page = request.args.get('next') or url_for('shop.home')
-            return redirect(next_page)
-
-        flash('Invalid email or password.', 'danger')
-        return redirect(url_for('auth.login'))
-
-    return render_template('login.html', form=form)
+    return redirect(url_for('auth.account', mode='login', next=request.args.get('next')))
 
 
 @auth_bp.route('/logout')

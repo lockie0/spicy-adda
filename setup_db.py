@@ -1,4 +1,3 @@
-import os
 from werkzeug.security import generate_password_hash
 from app import create_app, db
 from app.models import Category, Product, User
