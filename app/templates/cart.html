@@ -10,10 +10,10 @@
                         <img src="{{ item.product.image if item.product.image.startswith('http') else url_for('static', filename='images/food-fallback.svg') }}" alt="{{ item.product.name }}" onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/food-fallback.svg') }}';" />
                         <div>
                             <h3>{{ item.product.name }}</h3>
-                            <p>₹{{ item.product.price }} each · Subtotal: ₹{{ item.product.price * item.quantity }}</p>
+                            <p>₹{{ item.product.price }} each · Subtotal: <strong data-item-subtotal data-price="{{ item.product.price }}">₹{{ item.product.price * item.quantity }}</strong></p>
                             <form action="{{ url_for('cart.update_cart', item_id=item.id) }}" method="post">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                                <input type="number" name="quantity" min="1" value="{{ item.quantity }}" />
+                                <div class="quantity-control"><button type="button" data-quantity-step="-1" aria-label="Decrease quantity">−</button><input type="number" name="quantity" min="1" max="{{ item.product.stock }}" value="{{ item.quantity }}" data-quantity-input /><button type="button" data-quantity-step="1" aria-label="Increase quantity">+</button></div>
                                 <button class="btn btn-secondary" type="submit">Update</button>
                             </form>
                             <form action="{{ url_for('cart.remove_from_cart', item_id=item.id) }}" method="post" class="inline-form">
@@ -26,7 +26,7 @@
             </div>
             <aside class="cart-summary">
                 <h3>Order Summary</h3>
-                <p>Total: ₹{{ total }}</p>
+                <p>Total: <strong data-cart-total data-total="{{ total }}">₹{{ total }}</strong></p>
                 <a href="{{ url_for('orders.checkout') }}" class="btn btn-primary">Proceed to Checkout</a>
             </aside>
         </div>

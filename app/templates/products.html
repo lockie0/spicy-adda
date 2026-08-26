@@ -1,78 +1,52 @@
 {% extends 'base.html' %}
 {% block content %}
 {% set fallback_image = url_for('static', filename='images/food-fallback.svg') %}
-{% set legacy_images = {
-    'Family Combo': 'https://upload.wikimedia.org/wikipedia/commons/d/d6/Delhi_Chaat_in_Mumbai.jpg'
+{% set image_map = {
+    'Mirchi Bajji': 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Andhra_famous_mirchi_bajji.JPG',
+    'Mirchi Bajji with Chaat': 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Stuffed_mirchi_bajji_%2816164286908%29.jpg',
+    'Challapunukulu': 'https://upload.wikimedia.org/wikipedia/commons/d/da/Punugulu_2.jpg',
+    'Onion Bonda': 'https://upload.wikimedia.org/wikipedia/commons/3/3e/Bonda2.jpg',
+    'Banana Bajji': 'https://upload.wikimedia.org/wikipedia/commons/9/9e/Banana_fritters.jpg',
+    'Onion Pakodi': 'https://upload.wikimedia.org/wikipedia/commons/5/52/Onion_Pakora_or_peaji.JPG',
+    'Maramaralu Mirchi': 'https://upload.wikimedia.org/wikipedia/commons/2/22/Bhel_puri_Snack.jpg',
+    'Tomato Mirchi': 'https://upload.wikimedia.org/wikipedia/commons/4/46/Bengali_Dal_Pakora_RedLentilFritter.JPG',
+    'Maramaralu with Kaju Mirchi': 'https://upload.wikimedia.org/wikipedia/commons/b/be/BHEL_PURI_HOMEMADE_KOTA_032.jpg',
+    'Bottani Chaat': 'https://upload.wikimedia.org/wikipedia/commons/a/a1/Spicy_Chana_Dal_Chaat_-_Western_India.jpg',
+    'Chanagapindi Pakodi': 'https://upload.wikimedia.org/wikipedia/commons/8/88/Pakora_%286005558506%29.jpg',
+    'Egg Bajji': 'https://upload.wikimedia.org/wikipedia/commons/2/27/Anda_Pakora.JPG',
+    'Bread Bajji': 'https://upload.wikimedia.org/wikipedia/commons/0/0c/Bread_Pakora_%28Bread_Pakoda%29.jpg',
+    'Samosa Big': 'https://upload.wikimedia.org/wikipedia/commons/9/95/Samosa_with_sweet_chutney.jpg',
+    'Aloo Bonda': 'https://upload.wikimedia.org/wikipedia/commons/3/3e/Bonda2.jpg',
+    'Masala Puri': 'https://upload.wikimedia.org/wikipedia/commons/d/d6/Delhi_Chaat_in_Mumbai.jpg',
+    'Thums Up': 'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=85'
 } %}
-<section class="container page-header">
-    <div>
-        <h2>Shop All Products</h2>
-        <p>Find your favorite snack, beverage, or combo with fast checkout.</p>
+<section class="shop-banner">
+    <div class="container shop-banner-inner">
+        <div><p class="eyebrow">Spicy Adda kitchen</p><h1>Shop All Products</h1><p>Fresh and tasty snacks, beverages and combos</p></div>
+        <div class="shop-filter-wrap"><form class="filter-form" method="get"><input type="text" name="q" value="{{ query }}" placeholder="Search products..." /><select name="category">{% for value, label in category_options %}<option value="{{ value }}" {% if value == selected_category %}selected{% endif %}>{{ label }}</option>{% endfor %}</select><select name="sort"><option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest</option><option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price Low to High</option><option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price High to Low</option></select><button type="submit" class="btn btn-primary">Filter</button></form></div>
     </div>
-    <form class="filter-form" method="get">
-        <input type="text" name="q" value="{{ query }}" placeholder="Search products..." />
-        <select name="category">
-            {% for value, label in category_options %}
-                <option value="{{ value }}" {% if value == selected_category %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
-        <select name="sort">
-            <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest</option>
-            <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price Low to High</option>
-            <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price High to Low</option>
-        </select>
-        <button type="submit" class="btn btn-primary">Filter</button>
-    </form>
 </section>
 
-<section class="container grid product-grid">
-    {% if selected_category == 'offers' %}
-        {% for name, description in offers %}
-            <article class="card product-card offer-product-card">
-                <div class="product-image-frame"><img src="{{ fallback_image }}" alt="{{ name }}" /></div>
-                <div class="card-body">
-                    <p class="product-category">SPICY ADDA OFFER</p>
-                    <h3>{{ name }}</h3>
-                    <p>{{ description }}</p>
-                    <div class="product-meta"><span>Special Deal</span></div>
-                </div>
-            </article>
-        {% endfor %}
-    {% elif products %}
-        {% for product in products %}
-            <article class="card product-card">
-                <div class="product-image-frame">
-                    {% if product.category.name == 'Combos' and combo_items.get(product.name) %}
-                        <div class="combo-image-grid combo-image-count-{{ combo_items[product.name]|length }}">
-                            {% for item_name in combo_items[product.name] %}
-                                {% set item_image = product_images.get(item_name, fallback_image) %}
-                                <img src="{{ item_image if item_image.startswith('http') else fallback_image }}" alt="{{ product.name }} - {{ item_name }}" onerror="this.onerror=null;this.src='{{ fallback_image }}';" />
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <img src="{{ legacy_images.get(product.name, product.image if product.image.startswith('http') else fallback_image) }}" alt="{{ product.name }}" onerror="this.onerror=null;this.src='{{ fallback_image }}';" />
-                    {% endif %}
-                </div>
-                <div class="card-body">
-                    <h3>{{ product.name }}</h3>
-                    <p>{{ product.description[:90] }}...</p>
-                    <div class="product-meta">
-                        <span>₹{{ product.price }}</span>
-                        <span>{{ product.stock }} left</span>
-                    </div>
-                    <div class="product-actions">
-                        <a href="{{ url_for('shop.product_detail', product_id=product.id) }}" class="btn btn-secondary">View Details</a>
-                        <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                            <input type="hidden" name="quantity" value="1" />
-                            <button type="submit" class="btn btn-primary">Add to Cart</button>
-                        </form>
-                    </div>
-                </div>
-            </article>
-        {% endfor %}
-    {% else %}
-        <p>No products found for this selection.</p>
-    {% endif %}
+<section id="all-items-menu" class="shop-board container">
+    <div class="shop-section-heading"><div class="shop-section-icon"><i class="fas fa-utensils" aria-hidden="true"></i></div><div><h2>ALL ITEMS MENU</h2><p>Fresh and hot snacks made for every craving</p></div><a href="{{ url_for('shop.products') }}?category=menu" class="section-link">View All <span>→</span></a></div>
+    <div class="shop-products-grid">
+        {% for product in menu_products %}
+            <article class="shop-product-card"><a class="shop-product-image" href="{{ url_for('shop.product_detail', product_id=product.id) }}"><img src="{{ image_map.get(product.name, product.image if product.image.startswith('http') else fallback_image) }}" alt="{{ product.name }}" onerror="this.onerror=null;this.src='{{ fallback_image }}';" loading="lazy" /></a><div class="shop-product-body"><h3>{{ product.name }}</h3><div class="shop-price-row"><strong>₹{{ product.price }}</strong><span>{{ product.stock }} left</span></div><div class="shop-product-actions"><a href="{{ url_for('shop.product_detail', product_id=product.id) }}" class="btn btn-secondary">View Details</a><form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /><input type="hidden" name="quantity" value="1" /><button type="submit" class="btn btn-primary">Add to Cart</button></form></div></div></article>
+        {% else %}<p class="shop-empty">No menu products found for this selection.</p>{% endfor %}
+    </div>
+</section>
+
+<section id="combos" class="shop-board container">
+    <div class="shop-section-heading"><div class="shop-section-icon"><i class="fas fa-graduation-cap" aria-hidden="true"></i></div><div><h2>COMBOS</h2><p>Perfect combos for you and your loved ones</p></div><a href="{{ url_for('shop.products') }}?category=combos" class="section-link">View All <span>→</span></a></div>
+    <div class="shop-combos-grid">
+        {% for product in combo_products %}
+            <article class="shop-combo-card {% if 'Family' in product.name or 'Mega' in product.name %}shop-combo-featured{% endif %}"><div class="shop-combo-images">{% set combo_names = combo_items.get(product.name, []) %}{% for image_number in range(4) %}{% if combo_names|length %}{% set item_name = combo_names[image_number % (combo_names|length)] %}{% else %}{% set item_name = product.name %}{% endif %}<img src="{{ product_images.get(item_name, fallback_image) if product_images.get(item_name, '').startswith('http') else fallback_image }}" alt="{{ product.name }} - {{ item_name }}" onerror="this.onerror=null;this.src='{{ fallback_image }}';" loading="lazy" />{% endfor %}</div><div class="shop-combo-body"><h3>{{ product.name }}</h3><p>{{ product.description }}</p><div class="shop-price-row"><strong>₹{{ product.price }}</strong><form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /><input type="hidden" name="quantity" value="1" /><button type="submit" class="btn btn-primary">Add to Cart</button></form></div></div></article>
+        {% else %}<p class="shop-empty">No combos found for this selection.</p>{% endfor %}
+    </div>
+</section>
+
+<section id="offers" class="shop-board container">
+    <div class="shop-section-heading"><div class="shop-section-icon"><i class="fas fa-gift" aria-hidden="true"></i></div><div><h2>OFFERS</h2><p>Exciting offers for everyone</p></div><a href="{{ url_for('shop.products') }}?category=offers" class="section-link">View All <span>→</span></a></div>
+    <div class="shop-offers-grid">{% set offer_icons = ['fa-gift', 'fa-graduation-cap', 'fa-clock', 'fa-users', 'fa-award'] %}{% for name, description in offers %}<article class="shop-offer-card"><div class="shop-offer-icon"><i class="fas {{ offer_icons[loop.index0] }}" aria-hidden="true"></i></div><div><h3>{{ name }}</h3><p>{{ description }}</p></div></article>{% endfor %}</div>
 </section>
 {% endblock %}

@@ -4,13 +4,22 @@
     <h2>Checkout</h2>
     <div class="checkout-grid">
         <div>
-            <h3>Shipping Address</h3>
+            <h3>Delivery Address</h3>
             <form method="post">
                 {{ form.hidden_tag() }}
-                <label>{{ form.address.label.text }}</label>
-                {{ form.address(class='form-input', placeholder='Enter your shipping address') }}
-                <label>{{ form.payment_method.label.text }}</label>
-                {{ form.payment_method(class='form-input') }}
+                <div class="saved-address-panel {% if not saved_address %}is-hidden{% endif %}" data-saved-address>
+                    <p class="saved-address-title">Using your saved address</p>
+                    <p>{{ current_user.address_full_name }}<br />{{ current_user.address_house }}, {{ current_user.address_street }}<br />{{ current_user.address_city }}, {{ current_user.address_state }} - {{ current_user.address_pincode }}<br />Mobile: {{ current_user.address_mobile }}</p>
+                    <button type="button" class="btn btn-secondary" data-change-address>Change Address</button>
+                </div>
+                <div class="address-fields {% if saved_address %}is-hidden{% endif %}" data-address-fields>
+                    <div class="address-grid">
+                        {% for field in [form.full_name, form.mobile, form.house_number, form.street, form.city, form.state, form.pincode] %}
+                            <div class="form-field"><label for="{{ field.id }}">{{ field.label.text }}</label>{{ field(class='form-input') }}{% for error in field.errors %}<small class="form-error">{{ error }}</small>{% endfor %}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <fieldset class="payment-methods"><legend>{{ form.payment_method.label.text }}</legend><div class="payment-options">{% for subfield in form.payment_method %}<label class="payment-option" for="{{ subfield.id }}">{{ subfield(class='payment-radio') }}<span class="payment-logo payment-logo-{{ loop.index }}">{% if loop.index == 1 %}P{% elif loop.index == 2 %}G{% elif loop.index == 3 %}₹{% else %}⌁{% endif %}</span><span>{{ subfield.label.text }}</span></label>{% endfor %}</div></fieldset>
                 {{ form.submit(class='btn btn-primary') }}
             </form>
         </div>

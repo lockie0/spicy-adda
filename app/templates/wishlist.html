@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
+{% set fallback_image = url_for('static', filename='images/food-fallback.svg') %}
 <section class="container history-page">
     <h2>My Wishlist</h2>
     {% if items %}
         <div class="product-grid">
             {% for item in items %}
                 <article class="card product-card">
-                    <img src="{{ item.product.image if item.product.image.startswith('http') else url_for('static', filename='images/food-fallback.svg') }}" alt="{{ item.product.name }}" onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/food-fallback.svg') }}';" />
+                    <img src="{{ item.product.image if item.product.image.startswith('http') else fallback_image }}" alt="{{ item.product.name }}" onerror="this.onerror=null;this.src='{{ fallback_image }}';" />
                     <div class="card-body">
                         <h3>{{ item.product.name }}</h3>
                         <p>{{ item.product.description[:90] }}...</p>
@@ -15,7 +16,7 @@
                             <span>{{ item.product.stock }} left</span>
                         </div>
                         <form action="{{ url_for('shop.remove_from_wishlist', product_id=item.product.id) }}" method="post">
-                            {{ csrf_token() }}
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                             <button type="submit" class="btn btn-danger">Remove</button>
                         </form>
                     </div>

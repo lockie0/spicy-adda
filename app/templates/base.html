@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet" />
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 <body class="app-shell {% if request.endpoint in ['auth.account', 'auth.register', 'auth.login'] %}auth-shell{% elif request.endpoint == 'shop.products' %}shop-shell{% endif %}">
     <header class="site-header">

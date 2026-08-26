@@ -58,6 +58,21 @@ def create_app():
                 connection.execute(text('ALTER TABLE user ADD COLUMN designation VARCHAR(80)'))
             if 'company' not in user_columns:
                 connection.execute(text('ALTER TABLE user ADD COLUMN company VARCHAR(120)'))
+            address_columns = {
+                'address_full_name': 'VARCHAR(120)',
+                'address_mobile': 'VARCHAR(20)',
+                'address_house': 'VARCHAR(120)',
+                'address_street': 'VARCHAR(160)',
+                'address_city': 'VARCHAR(80)',
+                'address_state': 'VARCHAR(80)',
+                'address_pincode': 'VARCHAR(12)',
+            }
+            for column_name, column_type in address_columns.items():
+                if column_name not in user_columns:
+                    connection.execute(text(f'ALTER TABLE user ADD COLUMN {column_name} {column_type}'))
+            order_columns = {column['name'] for column in inspect(db.engine).get_columns('order')}
+            if 'payment_method' not in order_columns:
+                connection.execute(text('ALTER TABLE "order" ADD COLUMN payment_method VARCHAR(40)'))
         from app.utils import sync_product_catalog
         sync_product_catalog()
 

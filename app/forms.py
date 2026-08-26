@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed, FileField
-from wtforms import StringField, PasswordField, SubmitField, TextAreaField, IntegerField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, TextAreaField, IntegerField, SelectField, RadioField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange, Optional
 
 
@@ -57,13 +57,18 @@ class CategoryForm(FlaskForm):
 
 
 class CheckoutForm(FlaskForm):
-    address = TextAreaField('Shipping Address', validators=[DataRequired(), Length(min=10, max=255)])
-    payment_method = SelectField('Payment Method', choices=[
-        ('UPI', 'UPI'),
+    full_name = StringField('Full Name', validators=[DataRequired(), Length(max=120)])
+    mobile = StringField('Mobile Number', validators=[DataRequired(), Length(min=7, max=20)])
+    house_number = StringField('House / Flat Number', validators=[DataRequired(), Length(max=120)])
+    street = StringField('Street / Area', validators=[DataRequired(), Length(max=160)])
+    city = StringField('City', validators=[DataRequired(), Length(max=80)])
+    state = StringField('State', validators=[DataRequired(), Length(max=80)])
+    pincode = StringField('Pincode', validators=[DataRequired(), Length(min=4, max=12)])
+    payment_method = RadioField('Payment Method', choices=[
         ('PhonePe', 'PhonePe'),
+        ('Google Pay', 'Google Pay'),
+        ('Paytm', 'Paytm'),
         ('Net Banking', 'Net Banking'),
-        ('razorpay', 'Razorpay Placeholder'),
-        ('stripe', 'Stripe Placeholder'),
     ], validators=[DataRequired()])
     submit = SubmitField('Place Order')
 

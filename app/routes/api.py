@@ -114,6 +114,7 @@ def list_orders():
             'id': order.id,
             'total': order.total,
             'status': order.status,
+                'payment_method': order.payment_method,
             'created_at': order.created_at.isoformat(),
         }
         for order in orders
@@ -128,6 +129,7 @@ def order_detail_api(order_id):
         'id': order.id,
         'total': order.total,
         'status': order.status,
+        'payment_method': order.payment_method,
         'shipping_address': order.shipping_address,
         'items': [
             {

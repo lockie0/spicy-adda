@@ -26,7 +26,7 @@
                         <td>
                             <a href="{{ url_for('admin.edit_product', product_id=product.id) }}" class="btn btn-secondary">Edit</a>
                             <form action="{{ url_for('admin.delete_product', product_id=product.id) }}" method="post" class="inline-form">
-                                {{ csrf_token() }}
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                 <button type="submit" class="btn btn-danger">Delete</button>
                             </form>
                         </td>

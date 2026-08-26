@@ -1,51 +1,87 @@
 {% extends 'base.html' %}
 {% block content %}
-<section class="hero container">
-    <div class="hero-copy">
-        <span class="eyebrow">Welcome to Spicy Adda</span>
-        <h1>Fresh Street Snacks Delivered Fast</h1>
-        <p>Discover crispy Bajjis, tasty Puri, flavor-packed combos, and refreshing beverages in one place.</p>
-        <a href="{{ url_for('shop.products') }}" class="btn btn-primary">Shop Now</a>
-        <a href="{{ url_for('auth.account') }}" class="btn btn-secondary">Login / Register</a>
+{% set fallback_image = url_for('static', filename='images/food-fallback.svg') %}
+{% set image_map = {
+    'Mirchi Bajji': 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Andhra_famous_mirchi_bajji.JPG',
+    'Mirchi Bajji with Chaat': 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Stuffed_mirchi_bajji_%2816164286908%29.jpg',
+    'Challapunukulu': 'https://upload.wikimedia.org/wikipedia/commons/d/da/Punugulu_2.jpg',
+    'Onion Bonda': 'https://upload.wikimedia.org/wikipedia/commons/3/3e/Bonda2.jpg',
+    'Banana Bajji': 'https://upload.wikimedia.org/wikipedia/commons/9/9e/Banana_fritters.jpg',
+    'Onion Pakodi': 'https://upload.wikimedia.org/wikipedia/commons/5/52/Onion_Pakora_or_peaji.JPG',
+    'Maramaralu Mirchi': 'https://upload.wikimedia.org/wikipedia/commons/2/22/Bhel_puri_Snack.jpg',
+    'Tomato Mirchi': 'https://upload.wikimedia.org/wikipedia/commons/4/46/Bengali_Dal_Pakora_RedLentilFritter.JPG',
+    'Maramaralu with Kaju Mirchi': 'https://upload.wikimedia.org/wikipedia/commons/b/be/BHEL_PURI_HOMEMADE_KOTA_032.jpg',
+    'Bottani Chaat': 'https://upload.wikimedia.org/wikipedia/commons/a/a1/Spicy_Chana_Dal_Chaat_-_Western_India.jpg',
+    'Chanagapindi Pakodi': 'https://upload.wikimedia.org/wikipedia/commons/8/88/Pakora_%286005558506%29.jpg',
+    'Egg Bajji': 'https://upload.wikimedia.org/wikipedia/commons/2/27/Anda_Pakora.JPG',
+    'Bread Bajji': 'https://upload.wikimedia.org/wikipedia/commons/0/0c/Bread_Pakora_%28Bread_Pakoda%29.jpg',
+    'Samosa Big': 'https://upload.wikimedia.org/wikipedia/commons/9/95/Samosa_with_sweet_chutney.jpg'
+} %}
+<section class="home-hero container">
+    <div>
+        <p class="eyebrow">Good food · good mood</p>
+        <h1>Hot snacks.<br /><span>Happy cravings.</span></h1>
+        <p>Fresh street food, made to order and delivered with a little extra spice.</p>
+        <a class="btn btn-primary" href="#all-items">Explore the menu <span aria-hidden="true">→</span></a>
     </div>
-    <div class="hero-image"></div>
+    <div class="hero-food-panel" role="img" aria-label="Spicy Adda street food selection">
+        <span class="hero-stamp">Fresh<br />daily</span>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/d/d6/Delhi_Chaat_in_Mumbai.jpg" alt="Fresh Indian chaat" onerror="this.onerror=null;this.src='{{ fallback_image }}';" />
+    </div>
 </section>
 
-<section class="featured container">
-    <h2>Featured Products</h2>
-    <div class="grid gallery-grid">
-        {% for product in featured %}
-            <article class="card">
-                <img src="{{ product.image if product.image.startswith('http') else url_for('static', filename='images/food-fallback.svg') }}" alt="{{ product.name }}" onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/food-fallback.svg') }}';" />
-                <div class="card-body">
-                    <h3>{{ product.name }}</h3>
-                    <p>{{ product.description[:90] }}...</p>
-                    <div class="card-meta">₹{{ product.price }}</div>
-                    <a href="{{ url_for('shop.product_detail', product_id=product.id) }}" class="btn btn-secondary">View</a>
+<section id="all-items" class="menu-section container">
+    <div class="section-heading">
+        <div class="section-icon" aria-hidden="true"><i class="fas fa-utensils"></i></div>
+        <div><p class="section-kicker">Fresh from the kitchen</p><h2>ALL ITEMS MENU</h2><p>Fresh and hot snacks made for every craving</p></div>
+        <a class="section-link" href="{{ url_for('shop.products') }}?category=menu">View All <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="menu-card-grid">
+        {% for product in menu_products %}
+            <article class="menu-product-card">
+                <a class="menu-image" href="{{ url_for('shop.product_detail', product_id=product.id) }}">
+                    <img src="{{ image_map.get(product.name, product.image if product.image.startswith('http') else fallback_image) }}" alt="{{ product.name }}" onerror="this.onerror=null;this.src='{{ fallback_image }}';" loading="lazy" />
+                </a>
+                <div class="menu-product-body"><h3>{{ product.name }}</h3><div class="menu-product-meta"><strong>₹{{ product.price }}</strong><span>{{ product.stock }} left</span></div>
+                    <div class="menu-actions"><a href="{{ url_for('shop.product_detail', product_id=product.id) }}" class="btn btn-secondary">View Details</a><form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /><input type="hidden" name="quantity" value="1" /><button type="submit" class="btn btn-primary">Add to Cart</button></form></div>
                 </div>
+            </article>
+        {% endfor %}
+    </div>
+    <p class="extra-line"><strong>EXTRA:</strong> Lemon Soda ₹20 <span>|</span> Masala Soda ₹40 <span>|</span> Water Bottle MRP</p>
+</section>
+
+<section class="menu-section combos-section container">
+    <div class="section-heading">
+        <div class="section-icon" aria-hidden="true"><i class="fas fa-star"></i></div>
+        <div><p class="section-kicker">More to share</p><h2>BEST COMBOS</h2><p>Perfect combos for you and your loved ones</p></div>
+        <a class="section-link" href="{{ url_for('shop.products') }}?category=combos">View All <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="combo-card-grid">
+        {% for product in combo_products %}
+            <article class="combo-card {% if loop.last %}combo-featured{% endif %}">
+                <div class="combo-images">
+                    {% for item_name in combo_items.get(product.name, [])[:4] %}
+                        <img src="{{ product_images.get(item_name, fallback_image) if product_images.get(item_name, '').startswith('http') else fallback_image }}" alt="{{ product.name }} - {{ item_name }}" onerror="this.onerror=null;this.src='{{ fallback_image }}';" loading="lazy" />
+                    {% endfor %}
+                </div>
+                <div class="combo-body"><h3>{{ product.name }}</h3><p>{{ product.description }}</p><div class="combo-bottom"><strong>₹{{ product.price }}</strong><form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /><input type="hidden" name="quantity" value="1" /><button type="submit" class="btn btn-primary">Add</button></form></div></div>
             </article>
         {% endfor %}
     </div>
 </section>
 
-<section class="categories container">
-    <h2>Shop by Category</h2>
-    <div class="grid category-grid">
-        {% for category in categories %}
-            <a href="{{ url_for('shop.products') }}?category={{ category.id }}" class="category-card">{{ category.name }}</a>
-        {% endfor %}
+<section class="menu-section offers-section container">
+    <div class="section-heading">
+        <div class="section-icon" aria-hidden="true"><i class="fas fa-gift"></i></div>
+        <div><p class="section-kicker">A little extra joy</p><h2>OFFERS</h2><p>Exciting offers for everyone</p></div>
+        <a class="section-link" href="{{ url_for('shop.products') }}?category=offers">View All <span aria-hidden="true">→</span></a>
     </div>
-</section>
-
-<section class="newsletter container">
-    <div class="newsletter-content">
-        <h2>Join the Spice Club</h2>
-        <p>Get updates on new combos, exclusive deals, and tasty offers.</p>
-        <form method="post" action="{{ url_for('shop.subscribe') }}">
-            {{ csrf_token() }}
-            <input type="email" name="email" placeholder="Enter your email" aria-label="Email" required />
-            <button type="submit" class="btn btn-primary">Subscribe</button>
-        </form>
+    <div class="offer-card-grid">
+        {% set offer_icons = ['fa-gift', 'fa-graduation-cap', 'fa-clock', 'fa-users', 'fa-award'] %}
+        {% for name, description in offers %}
+            <article class="offer-card"><div class="offer-icon"><i class="fas {{ offer_icons[loop.index0] }}"></i></div><div><h3>{{ name }}</h3><p>{{ description }}</p></div></article>
+        {% endfor %}
     </div>
 </section>
 {% endblock %}

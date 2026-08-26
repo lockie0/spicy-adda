@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
-<section class="container auth-page">
-    <div class="auth-card">
+<section class="container auth-page payment-result-page">
+    <div class="auth-card payment-result-card">
         <h2>Payment Successful</h2>
         <p>Thank you for your order! Your order #{{ order.id }} has been placed successfully.</p>
         <a href="{{ url_for('orders.detail', order_id=order.id) }}" class="btn btn-primary">View Order</a>

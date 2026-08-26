@@ -24,7 +24,7 @@
                         <td>{{ order.created_at.strftime('%Y-%m-%d') }}</td>
                         <td>
                             <form method="post" action="{{ url_for('admin.update_order_status', order_id=order.id) }}">
-                                {{ csrf_token() }}
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                 <select name="status">
                                     <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>Processing</option>
                                     <option value="Completed" {% if order.status == 'Completed' %}selected{% endif %}>Completed</option>

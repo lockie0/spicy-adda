@@ -22,12 +22,15 @@ def home():
     latest = Product.query.order_by(Product.created_at.desc()).limit(8).all()
     featured = Product.query.order_by(Product.price.asc()).limit(6).all()
     popular = Product.query.order_by(Product.stock.desc()).limit(6).all()
+    menu_products = Product.query.join(Category).filter(Category.name != 'Combos').order_by(Product.created_at.desc()).limit(10).all()
+    combo_products = Product.query.join(Category).filter(Category.name == 'Combos').order_by(Product.price.asc()).limit(6).all()
     recently = []
     for product_id in get_recently_viewed(session):
         product = Product.query.get(product_id)
         if product:
             recently.append(product)
-    return render_template('home.html', categories=categories, latest=latest, featured=featured, popular=popular, recently=recently)
+    product_images = {product.name: product.image for product in Product.query.all()}
+    return render_template('home.html', categories=categories, latest=latest, featured=featured, popular=popular, recently=recently, menu_products=menu_products, combo_products=combo_products, combo_items=COMBO_ITEMS, offers=OFFER_CATALOG, product_images=product_images)
 
 
 @shop_bp.route('/products')
@@ -65,9 +68,12 @@ def products():
         products_query = products_query.order_by(Product.created_at.desc())
 
     products = products_query.paginate(page=page, per_page=12, error_out=False)
+    display_products = products_query.all()
+    menu_products = [product for product in display_products if product.category and product.category.name != 'Combos']
+    combo_products = [product for product in display_products if product.category and product.category.name == 'Combos']
     form, categories = build_search_form(sort_by=sort_by)
     product_images = {product.name: product.image for product in Product.query.all()}
-    return render_template('products.html', products=products, categories=categories, category_options=SHOP_CATEGORIES, offers=OFFER_CATALOG, combo_items=COMBO_ITEMS, product_images=product_images, query=query, selected_category=category_filter, sort_by=sort_by, form=form)
+    return render_template('products.html', products=products, menu_products=menu_products, combo_products=combo_products, categories=categories, category_options=SHOP_CATEGORIES, offers=OFFER_CATALOG, combo_items=COMBO_ITEMS, product_images=product_images, query=query, selected_category=category_filter, sort_by=sort_by, form=form)
 
 
 @shop_bp.route('/product/<int:product_id>', methods=['GET', 'POST'])
