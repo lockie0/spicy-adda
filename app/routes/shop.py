@@ -3,7 +3,7 @@ from flask_login import current_user, login_required
 from app import db
 from app.forms import SearchForm, ReviewForm, ContactForm
 from app.models import Product, Category, Review, WishlistItem, ContactMessage, Subscriber
-from app.utils import COMBO_ITEMS, SHOP_CATEGORIES, OFFER_CATALOG, add_recently_viewed, get_recently_viewed
+from app.utils import COMBO_ITEMS, COMBO_SHOWCASE_ORDER, SHOP_CATEGORIES, OFFER_CATALOG, add_recently_viewed, get_product_ingredients, get_recently_viewed
 
 shop_bp = Blueprint('shop', __name__)
 
@@ -23,14 +23,26 @@ def home():
     featured = Product.query.order_by(Product.price.asc()).limit(6).all()
     popular = Product.query.order_by(Product.stock.desc()).limit(6).all()
     menu_products = Product.query.join(Category).filter(Category.name != 'Combos').order_by(Product.created_at.desc()).limit(10).all()
-    combo_products = Product.query.join(Category).filter(Category.name == 'Combos').order_by(Product.price.asc()).limit(6).all()
+    combo_products = Product.query.join(Category).filter(Category.name == 'Combos').all()
+    combo_lookup = {product.name: product for product in combo_products}
+    combo_cards = []
+    for combo_name in COMBO_SHOWCASE_ORDER:
+        product = combo_lookup.get(combo_name)
+        if product:
+            combo_cards.append({
+                'product_id': product.id,
+                'name': product.name,
+                'description': product.description,
+                'price': product.price,
+                'images': COMBO_ITEMS.get(combo_name, [])[:4],
+            })
     recently = []
     for product_id in get_recently_viewed(session):
-        product = Product.query.get(product_id)
+        product = db.session.get(Product, product_id)
         if product:
             recently.append(product)
     product_images = {product.name: product.image for product in Product.query.all()}
-    return render_template('home.html', categories=categories, latest=latest, featured=featured, popular=popular, recently=recently, menu_products=menu_products, combo_products=combo_products, combo_items=COMBO_ITEMS, offers=OFFER_CATALOG, product_images=product_images)
+    return render_template('home.html', categories=categories, latest=latest, featured=featured, popular=popular, recently=recently, menu_products=menu_products, combo_cards=combo_cards, combo_items=COMBO_ITEMS, offers=OFFER_CATALOG, product_images=product_images)
 
 
 @shop_bp.route('/products')
@@ -38,7 +50,7 @@ def products():
     query = request.args.get('q', '').strip()
     category_filter = request.args.get('category', 'all').strip().lower() or 'all'
     if category_filter.isdigit():
-        selected_category = Category.query.get(int(category_filter))
+        selected_category = db.session.get(Category, int(category_filter))
         category_filter = selected_category.name.lower().replace(' ', '-') if selected_category else 'all'
     sort_by = request.args.get('sort', 'newest')
     page = request.args.get('page', 1, type=int)
@@ -101,7 +113,8 @@ def product_detail(product_id):
         flash('Review submitted successfully.', 'success')
         return redirect(url_for('shop.product_detail', product_id=product.id))
 
-    return render_template('product_detail.html', product=product, categories=categories, reviews=reviews, review_form=review_form)
+    product_ingredients = get_product_ingredients(product)
+    return render_template('product_detail.html', product=product, categories=categories, reviews=reviews, review_form=review_form, product_ingredients=product_ingredients)
 
 
 @shop_bp.route('/wishlist')

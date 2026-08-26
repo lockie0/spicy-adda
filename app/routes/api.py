@@ -1,10 +1,21 @@
 from flask import Blueprint, jsonify, request, abort
 from flask_login import current_user, login_required
 from app.models import Product, Category, CartItem, Order
-from app import db
+from app import db, csrf
 from app.services.cart import add_product_to_cart, calculate_item_total, get_cart_items, set_cart_quantity
+from app.services.assistant import answer_question
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
+
+
+@api_bp.route('/assistant', methods=['POST'])
+@csrf.exempt
+def assistant():
+    body = request.get_json(silent=True) or {}
+    message = body.get('message', '')
+    if not isinstance(message, str):
+        abort(400)
+    return jsonify({'reply': answer_question(message, current_user if current_user.is_authenticated else None)})
 
 
 def product_to_dict(product):
@@ -16,6 +27,7 @@ def product_to_dict(product):
         'stock': product.stock,
         'category': product.category.name if product.category else None,
         'image': product.image,
+        'ingredients': product.ingredients,
         'created_at': product.created_at.isoformat(),
     }
 

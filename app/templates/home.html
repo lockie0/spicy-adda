@@ -22,7 +22,10 @@
         <p class="eyebrow">Good food · good mood</p>
         <h1>Hot snacks.<br /><span>Happy cravings.</span></h1>
         <p>Fresh street food, made to order and delivered with a little extra spice.</p>
-        <a class="btn btn-primary" href="#all-items">Explore the menu <span aria-hidden="true">→</span></a>
+        <div class="hero-actions">
+            <a class="btn btn-primary" href="{{ url_for('shop.products') }}">Order Now</a>
+            <a class="btn btn-secondary" href="#all-items">Explore the menu <span aria-hidden="true">→</span></a>
+        </div>
     </div>
     <div class="hero-food-panel" role="img" aria-label="Spicy Adda street food selection">
         <span class="hero-stamp">Fresh<br />daily</span>
@@ -53,19 +56,30 @@
 
 <section class="menu-section combos-section container">
     <div class="section-heading">
-        <div class="section-icon" aria-hidden="true"><i class="fas fa-star"></i></div>
-        <div><p class="section-kicker">More to share</p><h2>BEST COMBOS</h2><p>Perfect combos for you and your loved ones</p></div>
+        <div class="section-icon" aria-hidden="true"><i class="fas fa-arrow-up"></i></div>
+        <div><h2>COMBOS</h2><p>Perfect combos for you and your loved ones</p></div>
         <a class="section-link" href="{{ url_for('shop.products') }}?category=combos">View All <span aria-hidden="true">→</span></a>
     </div>
     <div class="combo-card-grid">
-        {% for product in combo_products %}
-            <article class="combo-card {% if loop.last %}combo-featured{% endif %}">
+        {% for combo in combo_cards %}
+            <article class="combo-card {% if combo.name in ['Spicy Adda Mega Combo', 'Family Saver', 'Family Combo'] %}combo-featured{% endif %}">
                 <div class="combo-images">
-                    {% for item_name in combo_items.get(product.name, [])[:4] %}
-                        <img src="{{ product_images.get(item_name, fallback_image) if product_images.get(item_name, '').startswith('http') else fallback_image }}" alt="{{ product.name }} - {{ item_name }}" onerror="this.onerror=null;this.src='{{ fallback_image }}';" loading="lazy" />
+                    {% for item_name in combo.images %}
+                        <img src="{{ product_images.get(item_name, fallback_image) if product_images.get(item_name, '').startswith('http') else fallback_image }}" alt="{{ combo.name }} - {{ item_name }}" onerror="this.onerror=null;this.src='{{ fallback_image }}';" loading="lazy" />
                     {% endfor %}
                 </div>
-                <div class="combo-body"><h3>{{ product.name }}</h3><p>{{ product.description }}</p><div class="combo-bottom"><strong>₹{{ product.price }}</strong><form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /><input type="hidden" name="quantity" value="1" /><button type="submit" class="btn btn-primary">Add</button></form></div></div>
+                <div class="combo-body">
+                    <h3>{{ combo.name }}</h3>
+                    <p>{{ combo.description }}</p>
+                    <div class="combo-bottom">
+                        <strong>₹{{ combo.price }}</strong>
+                        <form action="{{ url_for('cart.add_to_cart', product_id=combo.product_id) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <input type="hidden" name="quantity" value="1" />
+                            <button type="submit" class="btn btn-primary">Add to Cart</button>
+                        </form>
+                    </div>
+                </div>
             </article>
         {% endfor %}
     </div>

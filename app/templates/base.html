@@ -75,6 +75,30 @@
         </div>
     </footer>
 
+    <aside class="chat-assistant" data-chat-assistant aria-label="Spicy Adda AI Assistant">
+        <button class="chat-launcher" type="button" data-chat-toggle aria-expanded="false" aria-controls="chat-window" title="Open Spicy Adda AI Assistant">
+            <span class="chat-launcher-icon" aria-hidden="true">✦</span>
+            <span class="chat-launcher-label">Ask Adda AI</span>
+        </button>
+        <section class="chat-window" id="chat-window" data-chat-window hidden>
+            <header class="chat-header">
+                <div>
+                    <strong>Spicy Adda AI Assistant</strong>
+                    <span><i aria-hidden="true"></i> Online</span>
+                </div>
+                <button class="chat-close" type="button" data-chat-toggle aria-label="Minimize chat">−</button>
+            </header>
+            <div class="chat-messages" data-chat-messages aria-live="polite">
+                <div class="chat-message chat-message-assistant">Hi! I can help with our menu, combos, offers, ingredients, orders, and payments.</div>
+            </div>
+            <form class="chat-form" data-chat-form>
+                <label class="sr-only" for="chat-message-input">Ask Spicy Adda AI Assistant</label>
+                <input id="chat-message-input" data-chat-input type="text" placeholder="Ask me about our menu..." autocomplete="off" maxlength="500" />
+                <button type="submit" aria-label="Send message" title="Send message">&#8593;</button>
+            </form>
+        </section>
+    </aside>
+
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>

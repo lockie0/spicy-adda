@@ -2,8 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import current_user, login_required
 
 from app.services.dashboard import (
-    calculate_today_order_count,
-    calculate_today_revenue,
+    get_today_metrics,
     filter_orders_by_company,
     get_user_orders,
     get_orders,
@@ -27,6 +26,7 @@ def dashboard():
 
     all_orders = get_orders()
     company_orders = filter_orders_by_company(all_orders, selected_company)
+    today_order_count, today_revenue = get_today_metrics(company_orders)
     return render_template(
         'employee_dashboard.html',
         tab=tab,
@@ -34,6 +34,6 @@ def dashboard():
         selected_company=selected_company,
         my_orders=get_user_orders(current_user.id),
         company_orders=company_orders,
-        today_order_count=calculate_today_order_count(company_orders),
-        today_revenue=calculate_today_revenue(company_orders),
+        today_order_count=today_order_count,
+        today_revenue=today_revenue,
     )

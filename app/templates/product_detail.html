@@ -23,6 +23,35 @@
     </div>
 </section>
 
+<section class="container ingredients-section">
+    <div class="ingredients-card">
+        <h3>🥘 INGREDIENTS</h3>
+        {% if product_ingredients is mapping and product_ingredients.get('ingredient_groups') %}
+            {% if product_ingredients.get('included_items') %}
+                <p class="ingredients-summary">Includes: {{ product_ingredients['included_items'] | join(', ') }}</p>
+            {% endif %}
+            {% for group_name, items in product_ingredients['ingredient_groups'].items() %}
+                <div class="ingredient-group">
+                    <h4>{{ group_name }}</h4>
+                    <ul>
+                        {% for ingredient in items %}
+                            <li>• {{ ingredient }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+        {% elif product_ingredients %}
+            <ul class="ingredients-list">
+                {% for ingredient in product_ingredients %}
+                    <li>• {{ ingredient }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No ingredient details are available for this product yet.</p>
+        {% endif %}
+    </div>
+</section>
+
 <section class="container reviews-section">
     <h2>Customer Reviews</h2>
     {% if reviews %}

@@ -73,6 +73,9 @@ def create_app():
             order_columns = {column['name'] for column in inspect(db.engine).get_columns('order')}
             if 'payment_method' not in order_columns:
                 connection.execute(text('ALTER TABLE "order" ADD COLUMN payment_method VARCHAR(40)'))
+            product_columns = {column['name'] for column in inspect(db.engine).get_columns('product')}
+            if 'ingredients' not in product_columns:
+                connection.execute(text('ALTER TABLE product ADD COLUMN ingredients TEXT'))
         from app.utils import sync_product_catalog
         sync_product_catalog()
 

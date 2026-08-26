@@ -1,21 +1,13 @@
-import os
 from functools import wraps
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user, login_user
-from werkzeug.utils import secure_filename
 
 from app import db
 from app.forms import CategoryForm
 from app.models import User, Product, Category, Order
+from app.utils import save_image
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
-
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'svg'}
-
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 
 def admin_required(func):
     @wraps(func)
@@ -83,13 +75,12 @@ def add_product():
         price = request.form.get('price', type=int)
         stock = request.form.get('stock', type=int)
         category_id = request.form.get('category', type=int)
+        ingredients_input = request.form.get('ingredients', '').strip()
         image_file = request.files.get('image')
         filename = 'default.jpg'
 
-        if image_file and allowed_file(image_file.filename):
-            filename = secure_filename(image_file.filename)
-            image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-            image_file.save(image_path)
+        if image_file:
+            filename = save_image(image_file) or filename
 
         product = Product(
             name=name,
@@ -98,6 +89,7 @@ def add_product():
             stock=stock,
             category_id=category_id,
             image=filename,
+            ingredients=ingredients_input or None,
         )
         db.session.add(product)
         db.session.commit()
@@ -120,13 +112,14 @@ def edit_product(product_id):
         product.price = request.form.get('price', type=int)
         product.stock = request.form.get('stock', type=int)
         product.category_id = request.form.get('category', type=int)
+        ingredients_raw = request.form.get('ingredients', '').strip()
+        product.ingredients = ingredients_raw or product.ingredients
         image_file = request.files.get('image')
 
-        if image_file and allowed_file(image_file.filename):
-            filename = secure_filename(image_file.filename)
-            image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-            image_file.save(image_path)
-            product.image = filename
+        if image_file:
+            filename = save_image(image_file)
+            if filename:
+                product.image = filename
 
         db.session.commit()
         flash('Product updated successfully.', 'success')

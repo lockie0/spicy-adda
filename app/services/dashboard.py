@@ -1,15 +1,23 @@
 from datetime import date
 
-from app.models import Order
+from sqlalchemy.orm import joinedload, selectinload
+
+from app.models import Order, OrderDetail
 from app.utils import get_company_from_email
 
 
 def get_orders():
-    return Order.query.order_by(Order.created_at.desc()).all()
+    return Order.query.options(
+        joinedload(Order.user),
+        selectinload(Order.details).joinedload(OrderDetail.product),
+    ).order_by(Order.created_at.desc()).all()
 
 
 def get_user_orders(user_id):
-    return Order.query.filter_by(user_id=user_id).order_by(Order.created_at.desc()).all()
+    return Order.query.filter_by(user_id=user_id).options(
+        joinedload(Order.user),
+        selectinload(Order.details).joinedload(OrderDetail.product),
+    ).order_by(Order.created_at.desc()).all()
 
 
 def filter_orders_by_company(orders, company):
@@ -31,9 +39,14 @@ def get_today_orders(orders):
     ]
 
 
+def get_today_metrics(orders):
+    today_orders = get_today_orders(orders)
+    return len(today_orders), sum(order.total for order in today_orders)
+
+
 def calculate_today_order_count(orders):
-    return len(get_today_orders(orders))
+    return get_today_metrics(orders)[0]
 
 
 def calculate_today_revenue(orders):
-    return sum(order.total for order in get_today_orders(orders))
+    return get_today_metrics(orders)[1]
